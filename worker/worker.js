@@ -1,5 +1,6 @@
 import { parentPort } from 'worker_threads';
 import { createHash } from 'crypto';
+import SharedMap from 'sharedmap';
 
 function hashString(str) {
     return createHash('md5').update(str).digest('hex');
@@ -17,7 +18,6 @@ function generateWordFromIndex(alphabet, maxLength, index) {
     let word = '';
     let alphabetSize = alphabet.length;
 
-    // Определяем длину слова
     let length = 1;
     let relativeIndex = index;
 
@@ -26,7 +26,6 @@ function generateWordFromIndex(alphabet, maxLength, index) {
         length++;
     }
 
-    // Вычисляем индекс внутри слов данной длины
     for (let i = 0; i < length; i++) {
         let letterIndex = relativeIndex % alphabetSize;
         word = alphabet[letterIndex] + word;
@@ -35,7 +34,7 @@ function generateWordFromIndex(alphabet, maxLength, index) {
     return word;
 }
 
-async function hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId) {
+async function hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, myMap) {
     const totalWords = getTotalWordsCount(alphabet, maxLength);
     const range = {
         start: Math.floor((partNumber - 1) * totalWords / partCount),
@@ -43,19 +42,24 @@ async function hardWork(hash, maxLength, alphabet, partNumber, partCount, reques
     };
 
     let found = [];
+    myMap.set(requestId, 0);
 
     for (let i = range.start; i < range.end; i++) {
         const word = generateWordFromIndex(alphabet, maxLength, i);
         if (hashString(word) === hash) {
             found.push(word);
         }
+        myMap.set(requestId, Math.floor((i - range.start) / (range.end - range.start) * 100));
     }
 
-    parentPort.postMessage({ found, requestId, status: 'READY' }); // Отправляем результат обратно в основной поток
+    parentPort.postMessage({ found, requestId, status: 'READY' });
 }
 
-// Принимаем сообщение из основного потока
 parentPort.on('message', (data) => {
-    const { hash, maxLength, alphabet, partNumber, partCount, requestId } = data;
-    hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId);
+
+    const { hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, sharedMap } = data;
+    const myMap = sharedMap
+    Object.setPrototypeOf(myMap, SharedMap.prototype);
+
+    hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, myMap);
 });
