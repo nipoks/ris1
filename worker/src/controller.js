@@ -5,6 +5,7 @@ import axios from "axios";
 let activeWorkers = 0;
 let taskQueue = [];
 const sharedMap = new SharedMap(10 * 1024 * 1024, 40, 8);
+
 function handleTaskQueue() {
     if (taskQueue.length > 0 && activeWorkers < 2) {
         const task = taskQueue.shift();
@@ -20,7 +21,7 @@ async function processTask(task) {
 
     const worker = new Worker('./src/worker.js');
 
-    worker.postMessage({ hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, sharedMap });
+    worker.postMessage({ hash, maxLength, alphabet, partNumber, partCount, requestId, sharedMap });
 
     worker.on('message', async (data) => {
         const { found, requestId, status } = data;

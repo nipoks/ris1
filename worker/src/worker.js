@@ -34,7 +34,7 @@ function generateWordFromIndex(alphabet, maxLength, index) {
     return word;
 }
 
-async function hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, myMap) {
+async function hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId, myMap) {
     const totalWords = getTotalWordsCount(alphabet, maxLength);
     const range = {
         start: Math.floor((partNumber - 1) * totalWords / partCount),
@@ -57,9 +57,9 @@ async function hardWork(hash, maxLength, alphabet, partNumber, partCount, reques
 
 parentPort.on('message', (data) => {
 
-    const { hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, sharedMap } = data;
+    const { hash, maxLength, alphabet, partNumber, partCount, requestId, sharedMap } = data;
     const myMap = sharedMap
     Object.setPrototypeOf(myMap, SharedMap.prototype);
 
-    hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId, workerIndex, myMap);
+    hardWork(hash, maxLength, alphabet, partNumber, partCount, requestId, myMap);
 });
