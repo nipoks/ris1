@@ -1,7 +1,11 @@
 import axios from 'axios';
 import {v4 as uuidv4} from "uuid";
+import dotenv from "dotenv";
 
-const WORKERS = ['http://worker1:4000', 'http://worker2:4000', 'http://worker3:4000'];
+
+dotenv.config();
+
+const WORKERS = process.env.WORKERS ? process.env.WORKERS.split(',') : [];
 let requests = {};
 const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
 

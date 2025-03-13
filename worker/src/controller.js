@@ -1,10 +1,15 @@
 import SharedMap from "sharedmap";
 import { Worker } from "worker_threads";
 import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 let activeWorkers = 0;
 let taskQueue = [];
 const sharedMap = new SharedMap(10 * 1024 * 1024, 40, 8);
+
+const MANAGER = process.env.MANAGER
 
 function handleTaskQueue() {
     if (taskQueue.length > 0 && activeWorkers < 2) {
@@ -28,7 +33,7 @@ async function processTask(task) {
         console.log(`Завершил обработку задачи ${requestId}. Найдено: ${found.length > 0 ? found : 'ничего'}`);
 
         try {
-            await axios.patch("http://manager:3000/internal/api/manager/hash/crack/request", {
+            await axios.patch(`${MANAGER}/internal/api/manager/hash/crack/request`, {
                 partNumber,
                 found: found.length > 0 ? found : null,
                 requestId: requestId,
