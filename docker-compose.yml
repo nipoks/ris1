@@ -11,6 +11,7 @@ services:
     depends_on:
       - worker1
       - worker2
+      - worker3
 
   worker1:
     build: ./worker
