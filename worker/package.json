@@ -1,7 +1,8 @@
 {
   "name": "worker",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,7 +11,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "crypto": "^1.0.1",
-    "express": "^4.21.2"
+    "axios": "^1.8.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "sharedmap": "^1.2.0"
   }
 }
